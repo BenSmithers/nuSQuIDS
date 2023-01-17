@@ -41,7 +41,7 @@
 #include <SQuIDS/SQuIDS.h>
 #include <nuSQuIDS/nuSQuIDS.h>
 #include <nuSQuIDS/marray.h>
-
+#include <nuSQuIDS/complex_nsi.h>
 #include <numpy/ndarrayobject.h>
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
@@ -435,5 +435,75 @@ template<typename BaseType, typename = typename std::enable_if<std::is_base_of<n
       return class_object;
     }
 };
+
+// registration for atmospheric template
+  struct RegisterNSIAtmNuSQuIDSPythonBindings {
+    const std::string class_label;
+    std::shared_ptr<class_<nuSQUIDSNSIATM, boost::noncopyable, std::shared_ptr<nuSQUIDSNSIATM>>> class_object;
+    RegisterNSIAtmNuSQuIDSPythonBindings(std::string class_label){
+      class_object = std::make_shared<class_<nuSQUIDSNSIATM, boost::noncopyable, std::shared_ptr<nuSQUIDSNSIATM>>>(class_label.c_str(), no_init);
+      class_object->def(init<marray<double,1>,double,marray<double,1>, unsigned int, NeutrinoType, bool, double, double, double>(args("CosZenith_vector","epsilon_mutau", "E_vector", "numneu","NT","iinteraction","th01","th02","th12")));
+      class_object->def(init<std::string>(args("filename")));
+      class_object->def("EvolveState",&nuSQUIDSNSIATM::EvolveState);
+      class_object->def("Set_TauRegeneration",&nuSQUIDSNSIATM::Set_TauRegeneration);
+      class_object->def("EvalFlavor",(double(nuSQUIDSNSIATM::*)(unsigned int,double,double,unsigned int,bool) const)&nuSQUIDSNSIATM::EvalFlavor,
+          nuSQUIDSAtm_EvalFlavor_overload<nuSQUIDSNSIATM>(args("Flavor","cos(theta)","Neutrino Energy","NeuType","BoolToRandomzeProdutionHeight"),
+            "nuSQuIDSAtm evaluate flux.."));
+      class_object->def("Set_EvalThreads",&nuSQUIDSNSIATM::Set_EvalThreads);
+      class_object->def("Get_EvalThreads",&nuSQUIDSNSIATM::Get_EvalThreads);
+      class_object->def("Set_EarthModel",&nuSQUIDSNSIATM::Set_EarthModel);
+      class_object->def("WriteStateHDF5",&nuSQUIDSNSIATM::WriteStateHDF5);
+      class_object->def("ReadStateHDF5",&nuSQUIDSNSIATM::ReadStateHDF5);
+      class_object->def("Set_MixingAngle",&nuSQUIDSNSIATM::Set_MixingAngle);
+      class_object->def("Get_MixingAngle",&nuSQUIDSNSIATM::Get_MixingAngle);
+      class_object->def("Set_CPPhase",&nuSQUIDSNSIATM::Set_CPPhase);
+      class_object->def("Get_CPPhase",&nuSQUIDSNSIATM::Get_CPPhase);
+      class_object->def("Set_SquareMassDifference",&nuSQUIDSNSIATM::Set_SquareMassDifference);
+      class_object->def("Get_SquareMassDifference",&nuSQUIDSNSIATM::Get_SquareMassDifference);
+      class_object->def("Set_h",(void(nuSQUIDSNSIATM::*)(double))&nuSQUIDSNSIATM::Set_h);
+      class_object->def("Set_h",(void(nuSQUIDSNSIATM::*)(double,unsigned int))&nuSQUIDSNSIATM::Set_h);
+      class_object->def("Set_h_max",(void(nuSQUIDSNSIATM::*)(double))&nuSQUIDSNSIATM::Set_h_max);
+      class_object->def("Set_h_max",(void(nuSQUIDSNSIATM::*)(double,unsigned int))&nuSQUIDSNSIATM::Set_h_max);
+      class_object->def("Set_h_min",(void(nuSQUIDSNSIATM::*)(double))&nuSQUIDSNSIATM::Set_h_min);
+      class_object->def("Set_h_min",(void(nuSQUIDSNSIATM::*)(double,unsigned int))&nuSQUIDSNSIATM::Set_h_min);
+      class_object->def("Set_ProgressBar",&nuSQUIDSNSIATM::Set_ProgressBar);
+      class_object->def("Set_MixingParametersToDefault",&nuSQUIDSNSIATM::Set_MixingParametersToDefault);
+      class_object->def("Set_GSL_step",wrap_nusqatm_Set_GSL_STEP<nuSQUIDSNSI>);
+      class_object->def("Set_rel_error",(void(nuSQUIDSNSIATM::*)(double))&nuSQUIDSNSIATM::Set_rel_error);
+      class_object->def("Set_rel_error",(void(nuSQUIDSNSIATM::*)(double, unsigned int))&nuSQUIDSNSIATM::Set_rel_error);
+      class_object->def("Set_abs_error",(void(nuSQUIDSNSIATM::*)(double))&nuSQUIDSNSIATM::Set_abs_error);
+      class_object->def("Set_abs_error",(void(nuSQUIDSNSIATM::*)(double, unsigned int))&nuSQUIDSNSIATM::Set_abs_error);
+      class_object->def("Set_EvolLowPassCutoff",&nuSQUIDSNSIATM::Set_EvolLowPassCutoff);
+      class_object->def("Set_EvolLowPassScale",&nuSQUIDSNSIATM::Set_EvolLowPassScale);
+      class_object->def("GetNumE",&nuSQUIDSNSIATM::GetNumE);
+      class_object->def("GetNumCos",&nuSQUIDSNSIATM::GetNumCos);
+      class_object->def("GetNumNeu",&nuSQUIDSNSIATM::GetNumNeu);
+      class_object->def("GetNumRho",&nuSQUIDSNSIATM::GetNumRho);
+      class_object->def("Set_mutau",(void(nuSQUIDSNSIATM::*)(double, double))&nuSQUIDSNSIATM::Set_mutau);
+      class_object->def("GetnuSQuIDS",(std::vector<nuSQUIDSNSI>&(nuSQUIDSNSIATM::*)())&nuSQUIDSNSIATM::GetnuSQuIDS,boost::python::return_internal_reference<>());
+      class_object->def("GetnuSQuIDS",(nuSQUIDSNSI&(nuSQUIDSNSIATM::*)(unsigned int))&nuSQUIDSNSIATM::GetnuSQuIDS,boost::python::return_internal_reference<>());
+      class_object->def("Set_initial_state",(void(nuSQUIDSNSIATM::*)(const marray<double,3>&, Basis))&nuSQUIDSNSIATM::Set_initial_state,nuSQUIDSAtm_Set_initial_state<nuSQUIDSNSIATM>());
+      class_object->def("Set_initial_state",(void(nuSQUIDSNSIATM::*)(const marray<double,4>&, Basis))&nuSQUIDSNSIATM::Set_initial_state,nuSQUIDSAtm_Set_initial_state<nuSQUIDSNSIATM>());
+      class_object->def("GetStates", (marray<double,2>(nuSQUIDSNSIATM::*)(unsigned int))&nuSQUIDSNSIATM::GetStates,
+        nuSQUIDSAtm_GetStates_overload<nuSQUIDSNSIATM>(args("rho"), "Get evolved states of all nodes"));
+      class_object->def("GetERange",&nuSQUIDSNSIATM::GetERange);
+      class_object->def("GetCosthRange",&nuSQUIDSNSIATM::GetCosthRange);
+      class_object->def("Set_IncludeOscillations",&nuSQUIDSNSIATM::Set_IncludeOscillations);
+      class_object->def("Set_GlashowResonance",&nuSQUIDSNSIATM::Set_GlashowResonance);
+      class_object->def("Set_TauRegeneration",&nuSQUIDSNSIATM::Set_TauRegeneration);
+      class_object->def("Set_AllowConstantDensityOscillationOnlyEvolution",&nuSQUIDSNSIATM::Set_AllowConstantDensityOscillationOnlyEvolution);
+      class_object->def("Set_PositivyConstrain",&nuSQUIDSNSIATM::Set_PositivityConstrain);
+      class_object->def("Set_PositivyConstrainStep",&nuSQUIDSNSIATM::Set_PositivityConstrainStep);
+      class_object->def("Get_EvalThreads",&nuSQUIDSNSIATM::Get_EvalThreads);
+      class_object->def("Set_EvalThreads",&nuSQUIDSNSIATM::Set_EvalThreads);
+      class_object->def("Set_EarthModel",&nuSQUIDSNSIATM::Set_EarthModel);
+      class_object->def("SetNeutrinoCrossSections",&nuSQUIDSNSIATM::SetNeutrinoCrossSections);
+      class_object->def("GetNeutrinoCrossSections",&nuSQUIDSNSIATM::GetNeutrinoCrossSections);
+    }
+    std::shared_ptr<class_<nuSQUIDSNSIATM, boost::noncopyable, std::shared_ptr<nuSQUIDSNSIATM>>> GetClassObject() {
+      return class_object;
+    }
+};
+
 
 #endif
