@@ -480,6 +480,7 @@ template<typename BaseType, typename = typename std::enable_if<std::is_base_of<n
       class_object->def("GetNumNeu",&nuSQUIDSNSIATM::GetNumNeu);
       class_object->def("GetNumRho",&nuSQUIDSNSIATM::GetNumRho);
       class_object->def("Set_mutau",(void(nuSQUIDSNSIATM::*)(double, double))&nuSQUIDSNSIATM::Set_mutau);
+      class_object->def("Set_NSI_param",(void(nuSQUIDSNSIATM::*)(unsigned int, unsigned int, double, double))&nuSQUIDSNSIATM::Set_NSI_param);
       class_object->def("GetnuSQuIDS",(std::vector<nuSQUIDSNSI>&(nuSQUIDSNSIATM::*)())&nuSQUIDSNSIATM::GetnuSQuIDS,boost::python::return_internal_reference<>());
       class_object->def("GetnuSQuIDS",(nuSQUIDSNSI&(nuSQUIDSNSIATM::*)(unsigned int))&nuSQUIDSNSIATM::GetnuSQuIDS,boost::python::return_internal_reference<>());
       class_object->def("Set_initial_state",(void(nuSQUIDSNSIATM::*)(const marray<double,3>&, Basis))&nuSQUIDSNSIATM::Set_initial_state,nuSQUIDSAtm_Set_initial_state<nuSQUIDSNSIATM>());

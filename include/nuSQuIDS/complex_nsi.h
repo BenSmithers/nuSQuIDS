@@ -15,6 +15,8 @@ class nuSQUIDSNSI: public nuSQUIDS {
     double epsilon_mutau;
     double ep_im;
 
+    gsl_matrix_complex * nsi_mat;
+
     void AddToPreDerive(double x){
       for(int ei = 0; ei < ne; ei++){
         // asumming same hamiltonian for neutrinos/antineutrinos
@@ -58,7 +60,9 @@ class nuSQUIDSNSI: public nuSQUIDS {
   public:
     //Constructor
 
-    nuSQUIDSNSI() : nuSQUIDS() {}
+    nuSQUIDSNSI() : nuSQUIDS() {
+        nsi_mat = gsl_matrix_complex_calloc(3,3);
+    }
 
     nuSQUIDSNSI(double epsilon_mutau, marray<double,1> Erange,unsigned int numneu, NeutrinoType NT,
                 bool iinteraction,double th01=0.563942, double th02=0.154085,double th12=0.785398):
@@ -68,12 +72,12 @@ class nuSQUIDSNSI: public nuSQUIDS {
         assert(numneu == 3);
         // defining a complex matrix M which will contain our flavor
         // violating flavor structure.
-        gsl_matrix_complex * M = gsl_matrix_complex_calloc(3,3);
+        nsi_mat = gsl_matrix_complex_calloc(3,3);
         gsl_complex c {{ epsilon_mutau , ep_im }};
-        gsl_matrix_complex_set(M,1,2,c);
-        gsl_matrix_complex_set(M,2,1,gsl_complex_conjugate(c));
+        gsl_matrix_complex_set(nsi_mat,1,2,c);
+        gsl_matrix_complex_set(nsi_mat,2,1,gsl_complex_conjugate(c));
         
-        NSI = squids::SU_vector(M);
+        NSI = squids::SU_vector(nsi_mat);
 
         //setting the mising angle for the flavro-mass basis, 
         //they are measured by the neutrino oscillation experiments.    
@@ -87,7 +91,6 @@ class nuSQUIDSNSI: public nuSQUIDS {
         for(int ei = 0; ei < ne; ei++){
         NSI_evol[ei] = squids::SU_vector(nsun);
         }
-        gsl_matrix_complex_free(M);
         
         HI_prefactor = params.sqrt2*params.GF*params.Na*pow(params.cm,-3);
     }
@@ -95,14 +98,14 @@ class nuSQUIDSNSI: public nuSQUIDS {
     void Set_mutau(double eps,double epsi){
         epsilon_mutau = eps;
         ep_im = epsi;
-        gsl_matrix_complex * M = gsl_matrix_complex_calloc(3,3);
         gsl_complex c {{ epsilon_mutau , ep_im }};
-        gsl_matrix_complex_set(M,1,2,c);
-        gsl_matrix_complex_set(M,2,1,gsl_complex_conjugate(c));
-        NSI = squids::SU_vector(M);    
+        gsl_matrix_complex_set(nsi_mat,1,2,c);
+        gsl_matrix_complex_set(nsi_mat,2,1,gsl_complex_conjugate(c));
+        NSI = squids::SU_vector(nsi_mat);    
         NSI.RotateToB1(params);
-        gsl_matrix_complex_free(M);
     }
+
+    void Set_NSI_param(unsigned int flavor_i, unsigned int flavor_j, double eps_real, double eps_imag);
   
   
 };
@@ -113,7 +116,7 @@ class nuSQUIDSNSIATM: public nuSQUIDSAtm<nuSQUIDSNSI>{
         
         void Set_mutau(double eps, double eps_imag);
 
-
+        void Set_NSI_param(unsigned int flavor_i, unsigned int flavor_j, double eps_real, double eps_imag);
 
 };
 
