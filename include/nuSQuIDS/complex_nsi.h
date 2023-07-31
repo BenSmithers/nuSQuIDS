@@ -12,8 +12,8 @@ class nuSQUIDSNSI: public nuSQUIDS {
     std::unique_ptr<double[]> hiBuffer;
     double HI_prefactor;
     // nsi parameters
-    double epsilon_mutau;
-    double ep_im;
+    double epsilon_mutau = 0.0;
+    double ep_im = 0.0;
 
     gsl_matrix_complex * nsi_mat;
 
