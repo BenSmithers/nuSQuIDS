@@ -12,8 +12,14 @@ class nuSQUIDSNSI: public nuSQUIDS {
     std::unique_ptr<double[]> hiBuffer;
     double HI_prefactor;
     // nsi parameters
-    double epsilon_mutau = 0.0;
-    double ep_im = 0.0;
+    double eps_mutau_real = 0.0;
+    double eps_mutau_im = 0.0;
+
+    double eps_etau_real = 0.0;
+    double eps_etau_im = 0.0;
+
+    double eps_emu_real = 0.0;
+    double eps_emu_im = 0.0;
 
     gsl_matrix_complex * nsi_mat;
 
@@ -29,14 +35,25 @@ class nuSQUIDSNSI: public nuSQUIDS {
     void AddToReadHDF5(hid_t hdf5_loc_id){
       // here we read the new parameters now saved in the HDF5 file
       hid_t nsi = H5Gopen(hdf5_loc_id, "nsi", H5P_DEFAULT);
-      H5LTget_attribute_double(hdf5_loc_id,"nsi","mu_tau" ,&epsilon_mutau);
+      H5LTget_attribute_double(hdf5_loc_id,"nsi","mu_tau_real" ,&eps_mutau_real);
+      H5LTget_attribute_double(hdf5_loc_id,"nsi","mu_tau_im" ,&eps_mutau_im);
+      H5LTget_attribute_double(hdf5_loc_id,"nsi","e_tau_real" ,&eps_etau_real);
+      H5LTget_attribute_double(hdf5_loc_id,"nsi","e_tau_im" ,&eps_etau_im);
+      H5LTget_attribute_double(hdf5_loc_id,"nsi","e_mu_real" ,&eps_emu_real);
+      H5LTget_attribute_double(hdf5_loc_id,"nsi","e_mu_im" ,&eps_emu_im);
       H5Gclose(nsi);
     }
 
     void AddToWriteHDF5(hid_t hdf5_loc_id) const {
       // here we write the new parameters to be saved in the HDF5 file
       H5Gcreate(hdf5_loc_id, "nsi", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-      H5LTset_attribute_double(hdf5_loc_id, "nsi","mu_tau",&epsilon_mutau, 1);
+      H5LTset_attribute_double(hdf5_loc_id,"nsi","mu_tau_real" ,&eps_mutau_real, 1);
+      H5LTset_attribute_double(hdf5_loc_id,"nsi","mu_tau_im" ,&eps_mutau_im, 1);
+      H5LTset_attribute_double(hdf5_loc_id,"nsi","e_tau_real" ,&eps_etau_real, 1);
+      H5LTset_attribute_double(hdf5_loc_id,"nsi","e_tau_im" ,&eps_etau_im, 1);
+      H5LTset_attribute_double(hdf5_loc_id,"nsi","e_mu_real" ,&eps_emu_real, 1);
+      H5LTset_attribute_double(hdf5_loc_id,"nsi","e_mu_im" ,&eps_emu_im, 1);
+      
     }
 
     squids::SU_vector HI(unsigned int ei,unsigned int index_rho) const{
@@ -64,18 +81,26 @@ class nuSQUIDSNSI: public nuSQUIDS {
         nsi_mat = gsl_matrix_complex_calloc(3,3);
     }
 
-    nuSQUIDSNSI(double epsilon_mutau, marray<double,1> Erange,unsigned int numneu, NeutrinoType NT,
+    nuSQUIDSNSI(double eps_mutau_real, marray<double,1> Erange,unsigned int numneu, NeutrinoType NT,
                 bool iinteraction,double th01=0.563942, double th02=0.154085,double th12=0.785398):
                         nuSQUIDS(Erange,numneu,NT,iinteraction),
-                        hiBuffer(new double[nsun*nsun]),epsilon_mutau(epsilon_mutau)
+                        hiBuffer(new double[nsun*nsun]),eps_mutau_real(eps_mutau_real)
     {
         assert(numneu == 3);
         // defining a complex matrix M which will contain our flavor
         // violating flavor structure.
         nsi_mat = gsl_matrix_complex_calloc(3,3);
-        gsl_complex c {{ epsilon_mutau , ep_im }};
-        gsl_matrix_complex_set(nsi_mat,1,2,c);
-        gsl_matrix_complex_set(nsi_mat,2,1,gsl_complex_conjugate(c));
+        gsl_complex n {{ eps_mutau_real , eps_mutau_im }};
+        gsl_complex s {{ eps_etau_real , eps_etau_im }};
+        gsl_complex i {{ eps_emu_real , eps_emu_im }};
+        gsl_matrix_complex_set(nsi_mat,1,2,n);
+        gsl_matrix_complex_set(nsi_mat,2,1,gsl_complex_conjugate(n));
+
+        gsl_matrix_complex_set(nsi_mat,0,2,n);
+        gsl_matrix_complex_set(nsi_mat,2,0,gsl_complex_conjugate(s));
+
+        gsl_matrix_complex_set(nsi_mat,0,1,n);
+        gsl_matrix_complex_set(nsi_mat,1,0,gsl_complex_conjugate(i));
         
         NSI = squids::SU_vector(nsi_mat);
 
@@ -96,9 +121,9 @@ class nuSQUIDSNSI: public nuSQUIDS {
     }
     
     void Set_mutau(double eps,double epsi){
-        epsilon_mutau = eps;
-        ep_im = epsi;
-        gsl_complex c {{ epsilon_mutau , ep_im }};
+        eps_mutau_real = eps;
+        eps_mutau_im = epsi;
+        gsl_complex c {{ eps_mutau_real , eps_mutau_im }};
         gsl_matrix_complex_set(nsi_mat,1,2,c);
         gsl_matrix_complex_set(nsi_mat,2,1,gsl_complex_conjugate(c));
         NSI = squids::SU_vector(nsi_mat);    

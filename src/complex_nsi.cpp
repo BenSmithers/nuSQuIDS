@@ -4,7 +4,6 @@
 namespace nusquids{
 
 void nuSQUIDSNSI::Set_NSI_param(unsigned int flavor_i, unsigned int flavor_j, double eps_real, double eps_imag){
-    gsl_complex c {{ eps_real, eps_imag}};
     if(flavor_i>=3 || flavor_j>=3 || flavor_i<0 || flavor_j<0){
         std::cout<< "No non-3 flavor models allowed!" << std::endl;
         throw std::runtime_error("Flavors must each satisfy 0<=i<3");
@@ -12,6 +11,7 @@ void nuSQUIDSNSI::Set_NSI_param(unsigned int flavor_i, unsigned int flavor_j, do
     if(flavor_j>flavor_i){
         throw std::runtime_error("Must have flavor_j > flavor_i");
     }
+    gsl_complex c {{ eps_real, eps_imag}};
     gsl_matrix_complex_set(nsi_mat, flavor_i, flavor_j, c);
     gsl_matrix_complex_set(nsi_mat, flavor_j, flavor_i, gsl_complex_conjugate(c));
     NSI = squids::SU_vector(nsi_mat);
